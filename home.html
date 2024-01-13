@@ -1,7 +1,55 @@
-<html>
-  <body>
-    <h1>Hello Extensions</h1>
-    <button id = "practiceButton">Not Practice</button>
-    <script src = "popup.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VocabHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #3498db;
+        }
+
+        p {
+            color: #555;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Set width and height for the popup */
+       #popup-container {
+            width: 300px;
+            height: 200px;
+            margin: 0 auto;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="popup-container">
+        <h1>VocabHub</h1>
+        <p>Extension to improve reading comprehension and vocabulary!</p>
+        <button id="signUpButton">Sign Up</button>
+        <button id="signInButton">Sign In</button>
+    </div>
+    <script src="popup.js"></script>
+</body>
 </html>

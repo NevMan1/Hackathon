@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In</title>
+    <title>VocabHub - Sign Up</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
@@ -25,11 +25,24 @@
             text-align: center;
         }
 
+        h2 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #555;
+        }
+
         input {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         button {
@@ -40,16 +53,25 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
 
 <form>
     <h2>Sign In</h2>
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required>
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
+    <label for="Email">Email:</label>
+    <input type="Email" id="Email" name="Email" required>
 
-    <button type="submit">Sign I
+    <label for="Password">Password:</label>
+    <input type="Password" id="Password" name="Password" required>
+
+    <button type="submit">Sign In</button>
+</form>
+
+</body>
+</html>
