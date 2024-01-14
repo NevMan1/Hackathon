@@ -3,6 +3,10 @@
     "name": "Hello Extensions",
     "description": "Extension to improve reading comprehension and vocabulary",
     "version": "1.0",
+    "action": {
+      "default_popup": "home.html",
+      "default_icon": "images/hello_extensions.png"
+    },
     "icons": {
       "16": "images/hello_extensions.png"
     },
