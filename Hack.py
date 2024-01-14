@@ -269,9 +269,9 @@ def setup_weights():
     df_filtered = example[columns_keep]
     df_filtered['BT Easiness'] += 5
     df_filtered['BT Easiness'] = df_filtered['BT Easiness'].clip(lower=0, upper=10)
-    df_filtered = df_filtered.head(10)
+    
     data_points_x = []
-    i = 0
+    
     for index, row in df_filtered.iterrows():
         record = [0,0,0]
         temp= row['Excerpt'].split()
@@ -281,9 +281,7 @@ def setup_weights():
         record[1] = np.count_nonzero(np.argmax(prediction, axis = 1) == 1)
         record[2] =np.count_nonzero(np.argmax(prediction, axis = 1) == 2)
         data_points_x.append(record)
-        i += 1
-        if i  == 10:
-            break
+        
         
         
     reform = np.array(data_points_x)
