@@ -1,21 +1,43 @@
-let email = document.getElementById('email');
-let password = document.getElementById('password');
-let loginButton = document.getElementById('login');
-let signupButton = document.getElementById('signup');
-let logoutButton = document.getElementById('logout');
-let show = document.getElementById('discriber');
+setupEventListeners();
 
-loginButton.addEventListener('click', function () {
-  login();
-});
+function setupEventListeners() {
+  let email = document.getElementById('email');
+  let password = document.getElementById('password');
+  let loginButton = document.getElementById('login');
+  let signupButton = document.getElementById('signup');
+  let logoutButton = document.getElementById('logout');
+  let logoutButton2 = document.getElementById('logout2');
+  let homeButton = document.getElementById("home");
 
-signupButton.addEventListener('click', function () {
-  signup();
-});
+  if (loginButton) {
+    loginButton.addEventListener('click', function () {
+      login();
+    });
+  }
 
-logoutButton.addEventListener('click', function () {
-  logout();
-});
+  if (signupButton) {
+    signupButton.addEventListener('click', function () {
+      signup();
+    });
+  }
+
+  if (logoutButton) {
+    logoutButton.addEventListener('click', function () {
+      logout();
+    });
+  }
+  if (logoutButton2) {
+    logoutButton2.addEventListener('click', function () {
+      logout();
+    });
+  }
+  if (homeButton) {
+    homeButton.addEventListener('click', function () {
+      console.log('Logout button clicked!');
+      window.location.href = 'practice.html';
+    });
+  }
+}
 
 function login() {
   let e = email.value;
@@ -33,7 +55,6 @@ function signup() {
     .then((userCredential) => {
       // Successfully created user
       let user = userCredential.user;
-      show.innerHTML = "Account created and logged in";
     })
     .catch((error) => {
       console.error("Sign Up Error:", error.code, error.message);
@@ -43,16 +64,34 @@ function signup() {
 function logout() {
   firebase.auth().signOut().then(() => {
     // Sign-out successful
-    show.innerHTML = "Logged Out";
   }).catch((error) => {
     console.error("Logout Error:", error.code, error.message);
   });
+  console.log('idk please work');
 }
 
 firebase.auth().onAuthStateChanged((user) => {
+  const popupContainer = document.getElementById('popup-container');
+  
   if (user) {
-    show.innerHTML = "Logged In";
+    fetch('loggedin.html')
+      .then(response => response.text())
+      .then(html => {
+        popupContainer.innerHTML = html;
+        setupEventListeners();
+      })
+      .catch(error => {
+        console.error('Error loading loggedin.html:', error);
+      });
   } else {
-    show.innerHTML = "User is not defined";
+    fetch('main.html')  
+      .then(response => response.text())
+      .then(html => {
+        popupContainer.innerHTML = html;
+        setupEventListeners();
+      })
+      .catch(error => {
+        console.error('Error loading main.html:', error);
+      });
   }
 });
