@@ -1,22 +1,26 @@
 {
+    "name" : "VocabHub",
+    "version":"1.0.0",
     "manifest_version": 3,
-    "name": "Hello Extensions",
-    "description": "Extension to improve reading comprehension and vocabulary",
-    "version": "1.0",
-    "action": {
-      "default_popup": "home.html",
-      "default_icon": "images/hello_extensions.png"
-    },
-    "icons": {
-      "16": "images/hello_extensions.png"
-    },
-    "content_scripts": [
-      {
-        "js": ["scripts/content.js"],
-        "matches": [
-          "https://developer.chrome.com/docs/extensions/*",
-          "https://developer.chrome.com/docs/webstore/*"
-        ]
-      }
-    ]
+    "permissions":[
+    "activeTab",
+    "tabs"
+],
+
+"content_scripts":[
+    {
+        "matches":["<all_urls>"],
+        "js":["main.js"],
+        "run_at":"document_end"
+    }
+],
+"action": {
+    "default_title": "VocabHub",
+    "default_popup": "main.html"
+},
+"background":{
+    "service-worker":"firebase.js"
 }
+
+}
+
