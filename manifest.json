@@ -1,20 +1,26 @@
 {
+    "name" : "VocabHub",
+    "version":"1.0.0",
     "manifest_version": 3,
-    "name": "VocabHub",
-    "description": "Extension to improve reading comprehension and vocabulary",
-    "version": "1.0",
-    "action": {
-      "default_popup": "home.html",
-      "default_icon": "images/10558814.png"
-    },
-    "icons": {
-      "16": "images/10558814.png"
-    },
-    "permissions": ["tabs"],
-    "web_accessible_resources": [
-      {
-        "resources": ["popup.js"],
-        "matches": ["<all_urls>"]
-      }
-    ]
-  }
+    "permissions":[
+    "activeTab",
+    "tabs"
+],
+
+"content_scripts":[
+    {
+        "matches":["<all_urls>"],
+        "js":["main.js"],
+        "run_at":"document_end"
+    }
+],
+"action": {
+    "default_title": "VocabHub",
+    "default_popup": "main.html"
+},
+"background":{
+    "service-worker":"firebase.js"
+}
+
+}
+

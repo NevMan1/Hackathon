@@ -1,4 +1,0 @@
-"action": {
-      "default_popup": "home.html",
-      "default_icon": "images/hello_extensions.png"
-    },
