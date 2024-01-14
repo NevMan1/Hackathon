@@ -2,7 +2,9 @@ from keras.models import Model
 from keras.optimizers import SGD, Adam
 from keras.layers import Input, Dense, Dropout, Flatten, Lambda, Embedding,Convolution1D, MaxPooling1D
 from keras.initializers import RandomNormal
-
+from sklearn.linear_model import LinearRegression
+import requests
+from bs4 import BeautifulSoup
 
 def create_model(filter_kernels, dense_outputs, maxlen, vocab_size, nb_filter, cat_output):
     initializer = RandomNormal(mean=0.0, stddev=0.05, seed=None)
@@ -76,7 +78,6 @@ def create_model(filter_kernels, dense_outputs, maxlen, vocab_size, nb_filter, c
     # model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
 
     return model
-
 import string
 import numpy as np
 import pandas as pd
@@ -132,6 +133,79 @@ def create_vocab_set():
         reverse_vocab[ix] = t
 
     return vocab, reverse_vocab, vocab_size, alphabet
+
+from __future__ import print_function
+from __future__ import division
+import json
+
+import numpy as np
+
+import keras
+from sklearn.model_selection import train_test_split
+
+def word_weight():
+    np.random.seed(123)  # for reproducibility
+
+    # set parameters:
+
+    subset = None
+
+    # Whether to save model parameters
+    save = True
+    #save=False
+    model_name_path = 'params/crepe_model3.h5'
+    model_weights_path = 'params/crepe_model_weights_with_test_v1.0.h5'
+
+    # Maximum length. Longer gets chopped. Shorter gets padded.
+    maxlen = 21
+
+    # Model params
+    # Filters for conv layers
+    nb_filter = 32
+    # Number of units in the dense layer
+    dense_outputs = 256
+    # Conv layer kernel size
+    filter_kernels = [3, 3, 2, 2, 2, 2]
+    # Number of units in the final output layer. Number of classes.
+    cat_output = 3
+
+    # Compile/fit params
+    batch_size = 750
+    nb_epoch = 100
+
+    print('Loading data...')
+    # Expect x to be a list of sentences. Y to be index of the categories.
+    (xt, yt) = load_data()
+
+    print('Creating vocab...')
+    vocab, reverse_vocab, vocab_size, alphabet = create_vocab_set()
+
+    print('Build model...')
+    model = create_model(filter_kernels, dense_outputs, maxlen, vocab_size,
+                                  nb_filter, cat_output)
+    #model.add(Dropout(0.4))
+    #model=keras.models.load_model('params\crepe_model.h5','r+')
+    # Encode data
+    xt = encode_data(xt, maxlen, vocab)
+    #X_train, X_test, Y_train, Y_test = train_test_split(xt, yt, test_size=0.3)
+    # x_test = preprocess.encode_data(x_test, maxlen, vocab)
+
+    print('Chars vocab: {}'.format(alphabet))
+    print('Chars vocab size: {}'.format(vocab_size))
+    print('X_train.shape: {}'.format(xt.shape))
+    #model.summary()
+    print('Fit model...')
+    model.fit(xt,yt,batch_size=batch_size, epochs=nb_epoch, shuffle=True)
+
+    prediction = model.predict(encode_data(["laptop","obnoxious", "camembert", "portuguese", "penicillin", "protactinium"], maxlen, vocab))
+    print(prediction)
+
+    scores = model.evaluate(xt, yt)
+    print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+    #import pickle
+    if save:
+        print('Saving model params...')
+        model.save_weights(model_weights_path)
     
 '''
 data_x, data_y = load_data()
@@ -146,123 +220,94 @@ input_data = encode_data(data_x, 21, vocab)
 print(input_data)
 '''
 
-from __future__ import print_function
-from __future__ import division
-import json
+def read_webpage(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Check if the request was successful
+        return response.text
+    except requests.exceptions.HTTPError as errh:
+        print("HTTP Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print("Something went wrong:", err)
 
-import numpy as np
+def extract_text_from_body(html_content):
+    soup = BeautifulSoup(html_content, 'html.parser')
 
-import keras
-from sklearn.model_selection import train_test_split
-np.random.seed(123)  # for reproducibility
+    # Remove all anchor tags
+    for a_tag in soup.find_all('a'):
+        a_tag.decompose()
 
-# set parameters:
+    # Get text from the body
+    body_text = soup.body.get_text(separator='\n', strip=True)
+    return body_text
 
-subset = None
-
-# Whether to save model parameters
-save = True
-#save=False
-model_name_path = 'params/crepe_model3.h5'
-model_weights_path = 'params/crepe_model_weights_with_test_v1.0.h5'
-
-# Maximum length. Longer gets chopped. Shorter gets padded.
-maxlen = 21
-
-# Model params
-# Filters for conv layers
-nb_filter = 32
-# Number of units in the dense layer
-dense_outputs = 256
-# Conv layer kernel size
-filter_kernels = [3, 3, 2, 2, 2, 2]
-# Number of units in the final output layer. Number of classes.
-cat_output = 3
-
-# Compile/fit params
-batch_size = 750
-nb_epoch = 10
-
-print('Loading data...')
-# Expect x to be a list of sentences. Y to be index of the categories.
-(xt, yt) = load_data()
-
-print('Creating vocab...')
-vocab, reverse_vocab, vocab_size, alphabet = create_vocab_set()
-
-print('Build model...')
-model = create_model(filter_kernels, dense_outputs, maxlen, vocab_size,
-                              nb_filter, cat_output)
-#model.add(Dropout(0.4))
-#model=keras.models.load_model('params\crepe_model.h5','r+')
-# Encode data
-xt = encode_data(xt, maxlen, vocab)
-#X_train, X_test, Y_train, Y_test = train_test_split(xt, yt, test_size=0.3)
-# x_test = preprocess.encode_data(x_test, maxlen, vocab)
-
-print('Chars vocab: {}'.format(alphabet))
-print('Chars vocab size: {}'.format(vocab_size))
-print('X_train.shape: {}'.format(xt.shape))
-#model.summary()
-print('Fit model...')
-model.fit(xt,yt,batch_size=batch_size, epochs=nb_epoch, shuffle=True)
-
-prediction = model.predict(encode_data(["laptop","obnoxious", "camembert", "portuguese", "penicillin", "protactinium"], maxlen, vocab))
-print(prediction)
-
-scores = model.evaluate(xt, yt)
-print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-#import pickle
-if save:
-    print('Saving model params...')
-    model.save_weights(model_weights_path)
-
-example = pd.read_csv('CLEAR Corpus 6.01 - CLEAR Corpus 6.01.csv')
-#print(example['Excerpt'])
-columns_keep = ['Excerpt', 'BT Easiness']
-df_filtered = example[columns_keep]
-
-df_filtered['BT Easiness'] += 5
-df_filtered['BT Easiness'] = df_filtered['BT Easiness'].clip(lower=0, upper=10)
-print(df_filtered)
-
-
-total = []
-for index, row in df_filtered.iterrows():
-    record = [0,0,0]
-    example= row['Excerpt'].split()
-    prediction = loaded_model.predict(encode_data(example, maxlen, vocab))
-    #print(prediction)
+def web_scrape(url):
+    webpage_content = read_webpage(url)
+    weights = [-0.00150539, -0.02668869, -0.08312362]
     
-    total_sum = 0
+    if webpage_content:
+        body_text = extract_text_from_body(webpage_content)
+        body_text = body_text.split()
+        #print(body_text)
+        start= loaded_model.predict(encode_data(body_text, maxlen, vocab))
+        easy = np.count_nonzero(np.argmax(start, axis = 1) == 0)
+        medium = np.count_nonzero(np.argmax(start, axis = 1) == 1)
+        hard =np.count_nonzero(np.argmax(start, axis = 1) == 2)
+        points = np.array([easy,medium,hard])
+        result = np.dot(points,weights) + 5.465
+        print(result)
+    else:
+        print(f"Failed to retrieve the content from {url}")
 
-    # Iterate through each inner array
-    record[0] = np.count_nonzero(np.argmax(prediction, axis = 1) == 0)
-    record[1] = np.count_nonzero(np.argmax(prediction, axis = 1) == 1)
-    record[2] =np.count_nonzero(np.argmax(prediction, axis = 1) == 2)
-    total.append(record)
-    
-        # Add the index to the total sum
-        #total_sum += max_index
-    
-    #record.append(total_sum/len(total))
-    
-    
-print(total)
+def setup_weights():
+    example = pd.read_csv('CLEAR Corpus 6.01 - CLEAR Corpus 6.01.csv')
+    columns_keep = ['Excerpt', 'BT Easiness']
+    df_filtered = example[columns_keep]
+    df_filtered['BT Easiness'] += 5
+    df_filtered['BT Easiness'] = df_filtered['BT Easiness'].clip(lower=0, upper=10)
+    df_filtered = df_filtered.head(10)
+    data_points_x = []
+    i = 0
+    for index, row in df_filtered.iterrows():
+        record = [0,0,0]
+        temp= row['Excerpt'].split()
+        prediction = loaded_model.predict(encode_data(example, maxlen, vocab))
 
-from sklearn.linear_model import LinearRegression
-reform = np.array(total)
-print(reform.shape)
-y_values = np.array(df_filtered['BT Easiness'])
-print(y_values.shape)
-model = LinearRegression()
-reform = reform.reshape(-1, 3)
-model.fit(reform, y_values)
+        record[0] = np.count_nonzero(np.argmax(prediction, axis = 1) == 0)
+        record[1] = np.count_nonzero(np.argmax(prediction, axis = 1) == 1)
+        record[2] =np.count_nonzero(np.argmax(prediction, axis = 1) == 2)
+        data_points_x.append(record)
+        i += 1
+        if i  == 10:
+            break
+        
+        
+    reform = np.array(data_points_x)
+    
+    y_values = np.array(df_filtered['BT Easiness'])
+    
+    model = LinearRegression()
+    reform = reform.reshape(-1, 3)
+    model.fit(reform, y_values)
 
-# Get the weights (coefficients) and intercept
-weights = model.coef_
-intercept = model.intercept_
+    # Get the weights (coefficients) and intercept
+    weights = model.coef_
+    intercept = model.intercept_
+    return weights,intercept
+    # Display the weights and intercept
+    print("Weights:", weights)
+    print("Intercept:", intercept)
 
-# Display the weights and intercept
-print("Weights:", weights)
-print("Intercept:", intercept)
+    
+#loaded_model = create_model(filter_kernels, dense_outputs, maxlen, vocab_size, nb_filter, cat_output)
+#loaded_model.load_weights(model_weights_path)
+#prediction = loaded_model.predict(encode_data(["fast","swift", "rapid", "speedy", "expeditious", "alacrituos"], maxlen, vocab))
+#print(prediction)
+weights, intercept =setup_weights()
+#print(weights)
+text = "https://pbskids.org"
+webpage_content = web_scrape(text)
