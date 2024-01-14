@@ -34,7 +34,7 @@ function setupEventListeners() {
   if (homeButton) {
     homeButton.addEventListener('click', function () {
       console.log('Logout button clicked!');
-      window.location.href = 'practice.html';
+      window.open('practice.html', '_blank');
     });
   }
 }
